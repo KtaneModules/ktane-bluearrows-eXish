@@ -866,6 +866,7 @@ public class BlueArrowsScript : MonoBehaviour {
             yield return new WaitForSeconds(0.5f);
             current = 0;
             numDisplay.GetComponent<TextMesh>().text = "" + coord;
+            Debug.LogFormat("[Blue Arrows #{0}] Module Reset back to initial state (no inputs)!", moduleId);
             yield break;
         }
 
@@ -883,7 +884,6 @@ public class BlueArrowsScript : MonoBehaviour {
                 buttonsToPress.Add(buttons[3]);
             else
                 yield break;
-            yield return new WaitForSeconds(0.1f);
         }
 
         yield return null;
