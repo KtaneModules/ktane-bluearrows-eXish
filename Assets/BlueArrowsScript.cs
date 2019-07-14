@@ -450,7 +450,7 @@ public class BlueArrowsScript : MonoBehaviour {
         else if (coord.Equals("H1"))
         {
             up += "N";
-            down += "A";
+            down += "Z";
             left += "W";
             right += "E";
         }
@@ -514,7 +514,7 @@ public class BlueArrowsScript : MonoBehaviour {
         {
             up += "E";
             down += "Y";
-            left += "A";
+            left += "Z";
             right += "I";
         }
         else if (coord.Equals("28"))
