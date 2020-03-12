@@ -98,6 +98,7 @@ public class BlueArrowsScript : MonoBehaviour {
                 current++;
                 if(current == 4)
                 {
+                    moduleSolved = true;
                     StartCoroutine(victory());
                 }
             }
@@ -824,7 +825,6 @@ public class BlueArrowsScript : MonoBehaviour {
         numDisplay.GetComponent<TextMesh>().text = "GG";
         StopCoroutine("victory");
         GetComponent<KMBombModule>().HandlePass();
-        moduleSolved = true;
     }
 
     private void getMoves()
@@ -888,5 +888,6 @@ public class BlueArrowsScript : MonoBehaviour {
 
         yield return null;
         yield return buttonsToPress;
+        if (moduleSolved) { yield return "solve"; }
     }
 }
