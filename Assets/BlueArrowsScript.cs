@@ -14,6 +14,10 @@ public class BlueArrowsScript : MonoBehaviour {
     public KMSelectable[] buttons;
     public GameObject numDisplay;
 
+    public KMColorblindMode Colorblind;
+    public GameObject colorblindText;
+    private bool colorblindMode;
+
     private string[] moves = new string[4];
     private int current;
 
@@ -21,14 +25,18 @@ public class BlueArrowsScript : MonoBehaviour {
     private string down;
     private string left;
     private string right;
+    private string center;
 
     private string priority;
     private string prevpriority;
+    private List<int> usedOperations = new List<int>();
 
     private string[] coord1 = { "C","3","G","7","D","5","H","2" };
     private string[] coord2 = { "A","1","B","8","F","4","E","6" };
     private string coord;
 
+    private bool animate = true;
+    private bool solveAnim = false;
     private Coroutine co;
 
     static int moduleIdCounter = 1;
@@ -40,10 +48,12 @@ public class BlueArrowsScript : MonoBehaviour {
         current = 0;
         moduleId = moduleIdCounter++;
         moduleSolved = false;
-        foreach(KMSelectable obj in buttons){
+        colorblindMode = Colorblind.ColorblindModeActive;
+        foreach (KMSelectable obj in buttons){
             KMSelectable pressed = obj;
             pressed.OnInteract += delegate () { PressButton(pressed); return false; };
         }
+        GetComponent<KMBombModule>().OnActivate += OnActivate;
     }
 
     void Start () {
@@ -55,22 +65,31 @@ public class BlueArrowsScript : MonoBehaviour {
         down = "DO";
         left = "LE";
         right = "RI";
+        center = "";
         numDisplay.GetComponent<TextMesh>().text = " ";
-        co = StartCoroutine(generateNewCoord());
+        generateNewCoord();
+    }
+
+    void OnActivate()
+    {
+        co = StartCoroutine(showText());
+        if (colorblindMode)
+            colorblindText.SetActive(true);
     }
 
     void PressButton(KMSelectable pressed)
     {
-        if(moduleSolved != true)
+        if (moduleSolved != true && !animate)
         {
             pressed.AddInteractionPunch(0.25f);
-            audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+            audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, pressed.transform);
             if(pressed == buttons[0] && !moves[current].Equals("UP"))
             {
                 GetComponent<KMBombModule>().HandleStrike();
                 Debug.LogFormat("[Blue Arrows #{0}] The button 'UP' was incorrect, expected '{1}'! Resetting module...", moduleId, moves[current]);
                 StopCoroutine(co);
                 Start();
+                co = StartCoroutine(showText());
             }
             else if (pressed == buttons[1] && !moves[current].Equals("DOWN"))
             {
@@ -78,6 +97,7 @@ public class BlueArrowsScript : MonoBehaviour {
                 Debug.LogFormat("[Blue Arrows #{0}] The button 'DOWN' was incorrect, expected '{1}'! Resetting module...", moduleId, moves[current]);
                 StopCoroutine(co);
                 Start();
+                co = StartCoroutine(showText());
             }
             else if (pressed == buttons[2] && !moves[current].Equals("LEFT"))
             {
@@ -85,6 +105,7 @@ public class BlueArrowsScript : MonoBehaviour {
                 Debug.LogFormat("[Blue Arrows #{0}] The button 'LEFT' was incorrect, expected '{1}'! Resetting module...", moduleId, moves[current]);
                 StopCoroutine(co);
                 Start();
+                co = StartCoroutine(showText());
             }
             else if (pressed == buttons[3] && !moves[current].Equals("RIGHT"))
             {
@@ -92,6 +113,7 @@ public class BlueArrowsScript : MonoBehaviour {
                 Debug.LogFormat("[Blue Arrows #{0}] The button 'RIGHT' was incorrect, expected '{1}'! Resetting module...", moduleId, moves[current]);
                 StopCoroutine(co);
                 Start();
+                co = StartCoroutine(showText());
             }
             else
             {
@@ -113,12 +135,15 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "K";
             left += "B";
             right += "G";
-        }else if (coord.Equals("C1"))
+            center += "A";
+        }
+        else if (coord.Equals("C1"))
         {
             up += "Z";
             down += "E";
             left += "A";
             right += "Y";
+            center += "G";
         }
         else if (coord.Equals("CB"))
         {
@@ -126,6 +151,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "I";
             left += "G";
             right += "F";
+            center += "Y";
         }
         else if (coord.Equals("C8"))
         {
@@ -133,6 +159,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "T";
             left += "Y";
             right += "J";
+            center += "F";
         }
         else if (coord.Equals("CF"))
         {
@@ -140,6 +167,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "S";
             left += "F";
             right += "D";
+            center += "J";
         }
         else if (coord.Equals("C4"))
         {
@@ -147,6 +175,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "R";
             left += "J";
             right += "K";
+            center += "D";
         }
         else if (coord.Equals("CE"))
         {
@@ -154,6 +183,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "P";
             left += "D";
             right += "B";
+            center += "K";
         }
         else if (coord.Equals("C6"))
         {
@@ -161,12 +191,15 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "P";
             left += "K";
             right += "A";
-        }else if (coord.Equals("3A"))
+            center += "B";
+        }
+        else if (coord.Equals("3A"))
         {
             up += "A";
             down += "J";
             left += "P";
             right += "E";
+            center += "K";
         }
         else if (coord.Equals("31"))
         {
@@ -174,6 +207,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "O";
             left += "K";
             right += "I";
+            center += "E";
         }
         else if (coord.Equals("3B"))
         {
@@ -181,6 +215,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "N";
             left += "E";
             right += "T";
+            center += "I";
         }
         else if (coord.Equals("38"))
         {
@@ -188,6 +223,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "D";
             left += "I";
             right += "S";
+            center += "T";
         }
         else if (coord.Equals("3F"))
         {
@@ -195,6 +231,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "X";
             left += "T";
             right += "R";
+            center += "S";
         }
         else if (coord.Equals("34"))
         {
@@ -202,6 +239,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "W";
             left += "S";
             right += "P";
+            center += "R";
         }
         else if (coord.Equals("3E"))
         {
@@ -209,6 +247,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "I";
             left += "R";
             right += "P";
+            center += "P";
         }
         else if (coord.Equals("36"))
         {
@@ -216,6 +255,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "T";
             left += "P";
             right += "K";
+            center += "P";
         }
         else if (coord.Equals("GA"))
         {
@@ -223,6 +263,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "B";
             left += "T";
             right += "O";
+            center += "J";
         }
         else if (coord.Equals("G1"))
         {
@@ -230,6 +271,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "Z";
             left += "J";
             right += "N";
+            center += "O";
         }
         else if (coord.Equals("GB"))
         {
@@ -237,6 +279,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "Q";
             left += "O";
             right += "D";
+            center += "N";
         }
         else if (coord.Equals("G8"))
         {
@@ -244,6 +287,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "K";
             left += "N";
             right += "X";
+            center += "D";
         }
         else if (coord.Equals("GF"))
         {
@@ -251,6 +295,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "A";
             left += "D";
             right += "W";
+            center += "X";
         }
         else if (coord.Equals("G4"))
         {
@@ -258,6 +303,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "U";
             left += "X";
             right += "I";
+            center += "W";
         }
         else if (coord.Equals("GE"))
         {
@@ -265,6 +311,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "L";
             left += "W";
             right += "T";
+            center += "I";
         }
         else if (coord.Equals("G6"))
         {
@@ -272,6 +319,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "N";
             left += "I";
             right += "J";
+            center += "T";
         }
         else if (coord.Equals("7A"))
         {
@@ -279,6 +327,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "V";
             left += "N";
             right += "Z";
+            center += "B";
         }
         else if (coord.Equals("71"))
         {
@@ -286,6 +335,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "S";
             left += "B";
             right += "Q";
+            center += "Z";
         }
         else if (coord.Equals("7B"))
         {
@@ -293,6 +343,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "G";
             left += "Z";
             right += "K";
+            center += "Q";
         }
         else if (coord.Equals("78"))
         {
@@ -300,6 +351,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "C";
             left += "Q";
             right += "A";
+            center += "K";
         }
         else if (coord.Equals("7F"))
         {
@@ -307,6 +359,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "O";
             left += "K";
             right += "U";
+            center += "A";
         }
         else if (coord.Equals("74"))
         {
@@ -314,6 +367,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "H";
             left += "A";
             right += "L";
+            center += "U";
         }
         else if (coord.Equals("7E"))
         {
@@ -321,6 +375,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "H";
             left += "U";
             right += "N";
+            center += "L";
         }
         else if (coord.Equals("76"))
         {
@@ -328,6 +383,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "Y";
             left += "L";
             right += "B";
+            center += "N";
         }
         else if (coord.Equals("DA"))
         {
@@ -335,6 +391,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "F";
             left += "Y";
             right += "S";
+            center += "B";
         }
         else if (coord.Equals("D1"))
         {
@@ -342,6 +399,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "N";
             left += "V";
             right += "G";
+            center += "S";
         }
         else if (coord.Equals("DB"))
         {
@@ -349,6 +407,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "M";
             left += "S";
             right += "C";
+            center += "G";
         }
         else if (coord.Equals("D8"))
         {
@@ -356,6 +415,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "P";
             left += "G";
             right += "O";
+            center += "C";
         }
         else if (coord.Equals("DF"))
         {
@@ -363,6 +423,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "L";
             left += "C";
             right += "H";
+            center += "O";
         }
         else if (coord.Equals("D4"))
         {
@@ -370,6 +431,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "R";
             left += "O";
             right += "H";
+            center += "H";
         }
         else if (coord.Equals("DE"))
         {
@@ -377,6 +439,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "T";
             left += "H";
             right += "Y";
+            center += "H";
         }
         else if (coord.Equals("D6"))
         {
@@ -384,6 +447,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "B";
             left += "H";
             right += "V";
+            center += "Y";
         }
         else if (coord.Equals("5A"))
         {
@@ -391,6 +455,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "W";
             left += "B";
             right += "N";
+            center += "V";
         }
         else if (coord.Equals("51"))
         {
@@ -398,6 +463,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "R";
             left += "F";
             right += "M";
+            center += "N";
         }
         else if (coord.Equals("5B"))
         {
@@ -405,6 +471,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "E";
             left += "N";
             right += "P";
+            center += "M";
         }
         else if (coord.Equals("58"))
         {
@@ -412,6 +479,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "U";
             left += "M";
             right += "L";
+            center += "P";
         }
         else if (coord.Equals("5F"))
         {
@@ -419,6 +487,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "F";
             left += "P";
             right += "R";
+            center += "L";
         }
         else if (coord.Equals("54"))
         {
@@ -426,6 +495,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "Z";
             left += "L";
             right += "T";
+            center += "R";
         }
         else if (coord.Equals("5E"))
         {
@@ -433,6 +503,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "V";
             left += "R";
             right += "B";
+            center += "T";
         }
         else if (coord.Equals("56"))
         {
@@ -440,6 +511,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "O";
             left += "T";
             right += "F";
+            center += "B";
         }
         else if (coord.Equals("HA"))
         {
@@ -447,6 +519,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "D";
             left += "O";
             right += "R";
+            center += "F";
         }
         else if (coord.Equals("H1"))
         {
@@ -454,6 +527,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "Z";
             left += "W";
             right += "E";
+            center += "R";
         }
         else if (coord.Equals("HB"))
         {
@@ -461,6 +535,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "X";
             left += "R";
             right += "U";
+            center += "E";
         }
         else if (coord.Equals("H8"))
         {
@@ -468,6 +543,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "I";
             left += "E";
             right += "F";
+            center += "U";
         }
         else if (coord.Equals("HF"))
         {
@@ -475,6 +551,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "M";
             left += "U";
             right += "Z";
+            center += "F";
         }
         else if (coord.Equals("H4"))
         {
@@ -482,6 +559,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "C";
             left += "F";
             right += "V";
+            center += "Z";
         }
         else if (coord.Equals("HE"))
         {
@@ -489,6 +567,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "S";
             left += "Z";
             right += "O";
+            center += "V";
         }
         else if (coord.Equals("H6"))
         {
@@ -496,6 +575,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "Q";
             left += "V";
             right += "W";
+            center += "O";
         }
         else if (coord.Equals("2A"))
         {
@@ -503,6 +583,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "A";
             left += "Q";
             right += "Z";
+            center += "W";
         }
         else if (coord.Equals("21"))
         {
@@ -510,6 +591,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "G";
             left += "D";
             right += "X";
+            center += "Z";
         }
         else if (coord.Equals("2B"))
         {
@@ -517,6 +599,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "Y";
             left += "Z";
             right += "I";
+            center += "X";
         }
         else if (coord.Equals("28"))
         {
@@ -524,6 +607,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "F";
             left += "X";
             right += "M";
+            center += "I";
         }
         else if (coord.Equals("2F"))
         {
@@ -531,6 +615,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "J";
             left += "I";
             right += "C";
+            center += "M";
         }
         else if (coord.Equals("24"))
         {
@@ -538,6 +623,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "D";
             left += "M";
             right += "S";
+            center += "C";
         }
         else if (coord.Equals("2E"))
         {
@@ -545,6 +631,7 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "K";
             left += "C";
             right += "Q";
+            center += "S";
         }
         else if (coord.Equals("26"))
         {
@@ -552,23 +639,28 @@ public class BlueArrowsScript : MonoBehaviour {
             down += "B";
             left += "S";
             right += "D";
+            center += "Q";
         }
         Debug.LogFormat("[Blue Arrows #{0}] Up Arrow is assigned to '{1}'! Down Arrow is assigned to '{2}'! Left Arrow is assigned to '{3}'! Right Arrow is assigned to '{4}'!", moduleId, up.ElementAt(2), down.ElementAt(2), left.ElementAt(2), right.ElementAt(2));
         makePriorityString();
     }
 
-    private IEnumerator generateNewCoord()
+    private IEnumerator showText()
     {
-        yield return null;
-        int rando = UnityEngine.Random.RandomRange(0, 8);
-        int rando2 = UnityEngine.Random.RandomRange(0, 8);
+        animate = true;
+        yield return new WaitForSeconds(0.5f);
+        numDisplay.GetComponent<TextMesh>().text = "" + coord[0];
+        yield return new WaitForSeconds(0.5f);
+        numDisplay.GetComponent<TextMesh>().text += "" + coord[1];
+        animate = false;
+    }
+
+    private void generateNewCoord()
+    {
+        int rando = UnityEngine.Random.Range(0, 8);
+        int rando2 = UnityEngine.Random.Range(0, 8);
         coord = coord1[rando] + "" + coord2[rando2];
         Debug.LogFormat("[Blue Arrows #{0}] The initial Coordinate is '{1}'!", moduleId, coord);
-        yield return new WaitForSeconds(0.5f);
-        numDisplay.GetComponent<TextMesh>().text = "" + coord1[rando];
-        yield return new WaitForSeconds(0.5f);
-        numDisplay.GetComponent<TextMesh>().text += "" + coord2[rando2];
-        StopCoroutine("generateNewCoord");
         getArrowLetters();
     }
 
@@ -577,11 +669,8 @@ public class BlueArrowsScript : MonoBehaviour {
         priority = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         int temp;
         int.TryParse(""+bomb.GetSerialNumber().ElementAt(5), out temp);
-        for (int i = 0; i < temp; i++)
-        {
-            priority = priority.ElementAt(25) + "" + priority.Substring(0,25);
-        }
-        Debug.LogFormat("[Blue Arrows #{0}] String Rotation: "+priority, moduleId);
+        priority = caesarShift(temp);
+        Debug.LogFormat("[Blue Arrows #{0}] String Caesar Shift: "+priority, moduleId);
         for (int i = 0; i < 6; i++)
         {
             if (priority.Contains(("" + bomb.GetSerialNumber().ElementAt(i))))
@@ -595,7 +684,7 @@ public class BlueArrowsScript : MonoBehaviour {
                 }
                 else
                 {
-                    string tem = ""+priority.ElementAt(te);
+                    string tem = "" + priority.ElementAt(te);
                     priority = priority.Remove(te,1);
                     priority = tem + "" + priority.Substring(0, 25);
                 }
@@ -612,139 +701,196 @@ public class BlueArrowsScript : MonoBehaviour {
         {
             if (bomb.IsIndicatorOn("BOB"))
             {
-                string tempprior = priority;
-                priority = "";
-                for (int i = 25; i >= 0; i--)
-                {
-                    priority += (""+tempprior.ElementAt(i));
-                }
+                preformOperation(0);
                 Debug.LogFormat("[Blue Arrows #{0}] Condition 2: " + priority, moduleId);
             }
             if ((bomb.GetBatteryCount() % 2) == 0)
             {
-                string vowels = "";
-                int counter = 26;
-                for (int i = 0; i < counter; i++)
-                {
-                    if (charIsVowel(priority.ElementAt(i)))
-                    {
-                        vowels += (""+priority.ElementAt(i));
-                        priority = priority.Remove(i, 1);
-                        counter--;
-                        i--;
-                    }
-                }
-                priority += vowels;
+                preformOperation(1);
                 Debug.LogFormat("[Blue Arrows #{0}] Condition 3: " + priority, moduleId);
             }
             if (!bomb.IsPortPresent("DVI"))
             {
-                string tempprior = priority;
-                priority = priority.Substring(0, 13);
-                for (int i = 25; i >= 13; i--)
-                {
-                    priority += (""+tempprior.ElementAt(i));
-                }
+                preformOperation(2);
                 Debug.LogFormat("[Blue Arrows #{0}] Condition 4: " + priority, moduleId);
             }
-            prevpriority = priority;
-            bool doneaction = false;
             if (bomb.IsPortPresent("StereoRCA"))
             {
-                int rind = priority.IndexOf('R');
-                priority = priority.Remove(rind, 1);
-                int cind = priority.IndexOf('C');
-                priority = priority.Remove(cind, 1);
-                int aind = priority.IndexOf('A');
-                priority = priority.Remove(aind, 1);
-                priority = "RCA" + priority;
-                doneaction = true;
+                preformOperation(3);
                 Debug.LogFormat("[Blue Arrows #{0}] Condition 5: " + priority, moduleId);
             }
-            if (isDisplayNumbers() && doneaction == true)
+            if (isDisplayNumbers())
             {
-                priority = prevpriority;
+                preformOperation(4);
                 Debug.LogFormat("[Blue Arrows #{0}] Condition 6: " + priority, moduleId);
             }
             if (!((bomb.GetBatteryHolderCount() % 2) == 0))
             {
-                string primes = "";
-                primes += ("" + priority.ElementAt(1));
-                primes += ("" + priority.ElementAt(2));
-                primes += ("" + priority.ElementAt(4));
-                primes += ("" + priority.ElementAt(6));
-                primes += ("" + priority.ElementAt(10));
-                primes += ("" + priority.ElementAt(12));
-                primes += ("" + priority.ElementAt(16));
-                primes += ("" + priority.ElementAt(18));
-                primes += ("" + priority.ElementAt(22));
-                for(int i = 0; i < 9; i++)
-                {
-                    for(int j = 0; j < priority.Length; j++)
-                    {
-                        if (priority.ElementAt(j).Equals(primes.ElementAt(i)))
-                        {
-                            priority = priority.Remove(j,1);
-                        }
-                    }
-                }
-                string reverse = "";
-                for (int i = primes.Length - 1; i >= 0; i--)
-                {
-                    reverse = reverse + primes.ElementAt(i);
-                }
-                priority = reverse + "" + priority;
+                preformOperation(5);
                 Debug.LogFormat("[Blue Arrows #{0}] Condition 7: " + priority, moduleId);
             }
-            if (bomb.GetSolvableModuleNames().Contains("Yellow Arrows") || bomb.GetSolvableModuleNames().Contains("Green Arrows") || bomb.GetSolvableModuleNames().Contains("The Sphere"))
+            if (coordLandsOnVowel())
             {
-                int index1 = priority.IndexOf('A');
-                int index2 = priority.IndexOf('E');
-                string front = "";
-                if(index1 < index2)
-                {
-                    front = priority.Substring((index1+1),(index2-index1-1));
-                    priority = priority.Remove((index1+1),(index2-index1-1));
-                }
-                else
-                {
-                    front = priority.Substring((index2+1), (index1 - index2 - 1));
-                    priority = priority.Remove((index2+1), (index1 - index2 - 1));
-                }
-                priority = front + "" + priority;
+                preformOperation(6);
                 Debug.LogFormat("[Blue Arrows #{0}] Condition 8: " + priority, moduleId);
             }
             if (charIsVowel(up.ElementAt(2)))
             {
-                int temp2 = ((int)left.ElementAt(2));
-                int temp_integer = 64;
-                for (int i = 0; i < (temp2-temp_integer); i++)
-                {
-                    priority = priority.ElementAt(25) + "" + priority.Substring(0, 25);
-                }
+                preformOperation(7);
                 Debug.LogFormat("[Blue Arrows #{0}] Condition 9: " + priority, moduleId);
             }
             if (charIsVowel(down.ElementAt(2)))
             {
-                string reverse = priority.Substring(0,13);
-                string reversebuild = "";
-                for (int i = reverse.Length - 1; i >= 0; i--)
-                {
-                    reversebuild = reversebuild + reverse.ElementAt(i);
-                }
-                priority = priority.Remove(0,13);
-                priority = reversebuild + "" + priority;
+                preformOperation(8);
                 Debug.LogFormat("[Blue Arrows #{0}] Condition 10: " + priority, moduleId);
             }
-            if (isAllLetters(numDisplay.GetComponent<TextMesh>().text))
+            if (isAllLetters(coord))
             {
-                int indexX = priority.IndexOf('X');
-                priority = priority.Remove(indexX, 1);
-                priority += "X";
+                preformOperation(9);
                 Debug.LogFormat("[Blue Arrows #{0}] Condition 11: " + priority, moduleId);
             }
         }
         getMoves();
+    }
+
+    private string caesarShift(int key)
+    {
+        string shifted = "";
+        char[] alpha = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+        for (int i = 0; i < priority.Length; i++)
+        {
+            int ind = Array.IndexOf(alpha, priority[i]);
+            ind -= key;
+            if (ind < 0)
+                ind += 26;
+            shifted += alpha[ind];
+        }
+        return shifted;
+    }
+
+    private void preformOperation(int type)
+    {
+        if (type == 0)
+        {
+            prevpriority = priority;
+            string tempprior = priority;
+            priority = "";
+            for (int i = 25; i >= 0; i--)
+            {
+                priority += ("" + tempprior.ElementAt(i));
+            }
+        }
+        else if (type == 1)
+        {
+            prevpriority = priority;
+            string vowels = "";
+            int counter = 26;
+            for (int i = 0; i < counter; i++)
+            {
+                if (charIsVowel(priority.ElementAt(i)))
+                {
+                    vowels += ("" + priority.ElementAt(i));
+                    priority = priority.Remove(i, 1);
+                    counter--;
+                    i--;
+                }
+            }
+            priority += vowels;
+        }
+        else if (type == 2)
+        {
+            prevpriority = priority;
+            string tempprior = priority;
+            priority = priority.Substring(0, 13);
+            for (int i = 25; i >= 13; i--)
+            {
+                priority += ("" + tempprior.ElementAt(i));
+            }
+        }
+        else if (type == 3)
+        {
+            prevpriority = priority;
+            int rind = priority.IndexOf('R');
+            priority = priority.Remove(rind, 1);
+            int cind = priority.IndexOf('C');
+            priority = priority.Remove(cind, 1);
+            int aind = priority.IndexOf('A');
+            priority = priority.Remove(aind, 1);
+            priority = "RCA" + priority;
+        }
+        else if (type == 4 || type == 9)
+        {
+            if (usedOperations.Count >= 1)
+            {
+                string temp = priority;
+                priority = prevpriority;
+                prevpriority = temp;
+            }
+        }
+        else if (type == 5)
+        {
+            prevpriority = priority;
+            string primes = "";
+            primes += ("" + priority.ElementAt(1));
+            primes += ("" + priority.ElementAt(2));
+            primes += ("" + priority.ElementAt(4));
+            primes += ("" + priority.ElementAt(6));
+            primes += ("" + priority.ElementAt(10));
+            primes += ("" + priority.ElementAt(12));
+            primes += ("" + priority.ElementAt(16));
+            primes += ("" + priority.ElementAt(18));
+            primes += ("" + priority.ElementAt(22));
+            for (int i = 0; i < 9; i++)
+            {
+                for (int j = 0; j < priority.Length; j++)
+                {
+                    if (priority.ElementAt(j).Equals(primes.ElementAt(i)))
+                    {
+                        priority = priority.Remove(j, 1);
+                    }
+                }
+            }
+            string reverse = "";
+            for (int i = primes.Length - 1; i >= 0; i--)
+            {
+                reverse = reverse + primes.ElementAt(i);
+            }
+            priority = reverse + "" + priority;
+        }
+        else if (type == 6)
+        {
+            prevpriority = priority;
+            int index1 = priority.IndexOf('A');
+            int index2 = priority.IndexOf('E');
+            string front = "";
+            if (index1 < index2)
+            {
+                front = priority.Substring((index1 + 1), (index2 - index1 - 1));
+                priority = priority.Remove((index1 + 1), (index2 - index1 - 1));
+            }
+            else
+            {
+                front = priority.Substring((index2 + 1), (index1 - index2 - 1));
+                priority = priority.Remove((index2 + 1), (index1 - index2 - 1));
+            }
+            priority = front + "" + priority;
+        }
+        else if (type == 7)
+        {
+            prevpriority = priority;
+            int temp2 = ((int)left.ElementAt(2));
+            int temp_integer = 64;
+            priority = caesarShift(temp2 - temp_integer);
+        }
+        else if (type == 8)
+        {
+            if (usedOperations.Count >= 1)
+            {
+                prevpriority = priority;
+                preformOperation(usedOperations.Last());
+            }
+        }
+        usedOperations.Add(type);
     }
 
     private bool isAllLetters(String name)
@@ -780,6 +926,15 @@ public class BlueArrowsScript : MonoBehaviour {
         return false;
     }
 
+    private bool coordLandsOnVowel()
+    {
+        if (center.Contains("A") || center.Contains("E") || center.Contains("O") || center.Contains("U") || center.Contains("I"))
+        {
+            return true;
+        }
+        return false;
+    }
+
     private bool charIsVowel(char c)
     {
         string temp = "" + c;
@@ -792,7 +947,7 @@ public class BlueArrowsScript : MonoBehaviour {
 
     private bool isDisplayNumbers()
     {
-        string num = numDisplay.GetComponent<TextMesh>().text;
+        string num = coord;
         char part1 = num.ElementAt(0);
         char part2 = num.ElementAt(1);
         if (part1.Equals('0') || part1.Equals('1') || part1.Equals('2') || part1.Equals('3') || part1.Equals('4') || part1.Equals('5') || part1.Equals('6') || part1.Equals('7') || part1.Equals('8') || part1.Equals('9'))
@@ -807,11 +962,11 @@ public class BlueArrowsScript : MonoBehaviour {
 
     private IEnumerator victory()
     {
-        yield return null;
+        solveAnim = true;
         for (int i = 0; i < 100; i++)
         {
-            int rand1 = UnityEngine.Random.RandomRange(0, 10);
-            int rand2 = UnityEngine.Random.RandomRange(0, 10);
+            int rand1 = UnityEngine.Random.Range(0, 10);
+            int rand2 = UnityEngine.Random.Range(0, 10);
             if (i < 50)
             {
                 numDisplay.GetComponent<TextMesh>().text = rand1 + "" + rand2;
@@ -823,8 +978,8 @@ public class BlueArrowsScript : MonoBehaviour {
             yield return new WaitForSeconds(0.025f);
         }
         numDisplay.GetComponent<TextMesh>().text = "GG";
-        StopCoroutine("victory");
         GetComponent<KMBombModule>().HandlePass();
+        solveAnim = false;
     }
 
     private void getMoves()
@@ -854,7 +1009,7 @@ public class BlueArrowsScript : MonoBehaviour {
 
     //twitch plays
     #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!{0} up [Presses the up arrow button] | !{0} right [Presses the right arrow button] | !{0} down [Presses the down arrow button once] | !{0} left [Presses the left arrow button once] | !{0} left right down up [Chain button presses] | !{0} reset [Resets the module back to the start] | Direction words can be substituted as one letter (Ex. right as r)";
+    private readonly string TwitchHelpMessage = @"!{0} up/down/left/right [Presses the specified arrow button] | !{0} left right down up [Chain button presses] | !{0} reset [Resets the module back to the start] | Direction words can be substituted as one letter (Ex. right as r)";
     #pragma warning restore 414
 
     IEnumerator ProcessTwitchCommand(string command)
@@ -889,5 +1044,24 @@ public class BlueArrowsScript : MonoBehaviour {
         yield return null;
         yield return buttonsToPress;
         if (moduleSolved) { yield return "solve"; }
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        while (animate) { yield return true; yield return new WaitForSeconds(0.1f); }
+        int start = current;
+        for (int i = start; i < 4; i++)
+        {
+            if (moves[i].Equals("UP"))
+                buttons[0].OnInteract();
+            else if (moves[i].Equals("DOWN"))
+                buttons[1].OnInteract();
+            else if (moves[i].Equals("LEFT"))
+                buttons[2].OnInteract();
+            else if (moves[i].Equals("RIGHT"))
+                buttons[3].OnInteract();
+            yield return new WaitForSeconds(0.1f);
+        }
+        while (solveAnim) { yield return true; yield return new WaitForSeconds(0.1f); }
     }
 }
