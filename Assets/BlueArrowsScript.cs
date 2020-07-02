@@ -66,6 +66,7 @@ public class BlueArrowsScript : MonoBehaviour {
         left = "LE";
         right = "RI";
         center = "";
+        usedOperations.Clear();
         numDisplay.GetComponent<TextMesh>().text = " ";
         generateNewCoord();
     }
