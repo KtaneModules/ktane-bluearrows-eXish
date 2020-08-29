@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Blue-Cyan-Tag
-  m_Shader: {fileID: 4800000, guid: 422751ddacfe7ae419b62378039e0fb5, type: 3}
+  m_Name: Component_PuzzleBackground
+  m_Shader: {fileID: 4800000, guid: 13f5b9a7d83e1184ca29c1ef5590d077, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -19,9 +19,8 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: ddb2a01083e95254cb56b9deff3b1de3, type: 3}
+        m_Texture: {fileID: 2800000, guid: ce2a98f5c47b7f94bb9451537e4fe5bc, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats: []
-    m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    m_Colors: []

@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: OstrichSanMat
-  m_Shader: {fileID: 4800000, guid: 306ffc165961a2c40806bad3bb861c43, type: 3}
+  m_Shader: {fileID: 4800000, guid: 5fe598935802b9348a12c634a8ef3ab7, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
