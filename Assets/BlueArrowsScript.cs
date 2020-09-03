@@ -84,7 +84,7 @@ public class BlueArrowsScript : MonoBehaviour {
         {
             pressed.AddInteractionPunch(0.25f);
             audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, pressed.transform);
-            if(pressed == buttons[0] && !moves[current].Equals("UP"))
+            if (pressed == buttons[0] && !moves[current].Equals("UP"))
             {
                 GetComponent<KMBombModule>().HandleStrike();
                 Debug.LogFormat("[Blue Arrows #{0}] The button 'UP' was incorrect, expected '{1}'! Resetting module...", moduleId, moves[current]);
@@ -119,7 +119,7 @@ public class BlueArrowsScript : MonoBehaviour {
             else
             {
                 current++;
-                if(current == 4)
+                if (current == 4)
                 {
                     moduleSolved = true;
                     StartCoroutine(victory());
@@ -939,7 +939,7 @@ public class BlueArrowsScript : MonoBehaviour {
     private bool charIsVowel(char c)
     {
         string temp = "" + c;
-        if(temp.Equals("A") || temp.Equals("E") || temp.Equals("O") || temp.Equals("U") || temp.Equals("I"))
+        if (temp.Equals("A") || temp.Equals("E") || temp.Equals("O") || temp.Equals("U") || temp.Equals("I"))
         {
             return true;
         }
@@ -991,15 +991,18 @@ public class BlueArrowsScript : MonoBehaviour {
             if (priority.ElementAt(i).Equals(up.ElementAt(2))){
                 moves[counter] = "UP";
                 counter++;
-            }else if (priority.ElementAt(i).Equals(down.ElementAt(2)))
+            }
+            else if (priority.ElementAt(i).Equals(down.ElementAt(2)))
             {
                 moves[counter] = "DOWN";
                 counter++;
-            }else if (priority.ElementAt(i).Equals(left.ElementAt(2)))
+            }
+            else if (priority.ElementAt(i).Equals(left.ElementAt(2)))
             {
                 moves[counter] = "LEFT";
                 counter++;
-            }else if (priority.ElementAt(i).Equals(right.ElementAt(2)))
+            }
+            else if (priority.ElementAt(i).Equals(right.ElementAt(2)))
             {
                 moves[counter] = "RIGHT";
                 counter++;
