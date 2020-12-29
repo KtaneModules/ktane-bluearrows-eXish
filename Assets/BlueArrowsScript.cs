@@ -886,10 +886,7 @@ public class BlueArrowsScript : MonoBehaviour {
         else if (type == 8)
         {
             if (usedOperations.Count >= 1)
-            {
-                prevpriority = priority;
                 preformOperation(usedOperations.Last());
-            }
         }
         usedOperations.Add(type);
     }
