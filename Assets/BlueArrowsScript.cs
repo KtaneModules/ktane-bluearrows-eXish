@@ -672,26 +672,7 @@ public class BlueArrowsScript : MonoBehaviour {
         int.TryParse(""+bomb.GetSerialNumber().ElementAt(5), out temp);
         priority = caesarShift(temp);
         Debug.LogFormat("[Blue Arrows #{0}] String Caesar Shift: "+priority, moduleId);
-        for (int i = 0; i < 6; i++)
-        {
-            if (priority.Contains(("" + bomb.GetSerialNumber().ElementAt(i))))
-            {
-                int te = priority.IndexOf(("" + bomb.GetSerialNumber().ElementAt(i)));
-                if (te == 0)
-                {
-                    string tem = "" + priority.ElementAt(0);
-                    priority = priority.Remove(0, 1);
-                    priority += tem;
-                }
-                else
-                {
-                    string tem = "" + priority.ElementAt(te);
-                    priority = priority.Remove(te,1);
-                    priority = tem + "" + priority.Substring(0, 25);
-                }
-                break;
-            }
-        }
+        preformOperation(10);
         Debug.LogFormat("[Blue Arrows #{0}] Move First Letter: " + priority, moduleId);
         if (bomb.IsIndicatorOn("BOB") && (bomb.GetBatteryCount() == 0) && (bomb.GetPortPlateCount() == 0) && noUnlitIndicators() && serialContainsVowel())
         {
@@ -887,6 +868,30 @@ public class BlueArrowsScript : MonoBehaviour {
         {
             if (usedOperations.Count >= 1)
                 preformOperation(usedOperations.Last());
+        }
+        else if (type == 10)
+        {
+            prevpriority = priority;
+            for (int i = 0; i < 6; i++)
+            {
+                if (priority.Contains(("" + bomb.GetSerialNumber().ElementAt(i))))
+                {
+                    int te = priority.IndexOf(("" + bomb.GetSerialNumber().ElementAt(i)));
+                    if (te == 0)
+                    {
+                        string tem = "" + priority.ElementAt(0);
+                        priority = priority.Remove(0, 1);
+                        priority += tem;
+                    }
+                    else
+                    {
+                        string tem = "" + priority.ElementAt(te);
+                        priority = priority.Remove(te, 1);
+                        priority = tem + "" + priority.Substring(0, 25);
+                    }
+                    break;
+                }
+            }
         }
         usedOperations.Add(type);
     }
