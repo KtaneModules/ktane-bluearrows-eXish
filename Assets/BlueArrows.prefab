@@ -515,7 +515,7 @@ Transform:
   - {fileID: 4453006862230908}
   m_Father: {fileID: 4067429724921462}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: -90.00001, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!4 &4432178449644378
 Transform:
   m_ObjectHideFlags: 1

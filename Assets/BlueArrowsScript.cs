@@ -1054,7 +1054,7 @@ public class BlueArrowsScript : MonoBehaviour {
 
     IEnumerator TwitchHandleForcedSolve()
     {
-        while (animate) { yield return true; yield return new WaitForSeconds(0.1f); }
+        while (animate) { yield return true; }
         int start = current;
         for (int i = start; i < 4; i++)
         {
@@ -1068,6 +1068,6 @@ public class BlueArrowsScript : MonoBehaviour {
                 buttons[3].OnInteract();
             yield return new WaitForSeconds(0.1f);
         }
-        while (solveAnim) { yield return true; yield return new WaitForSeconds(0.1f); }
+        while (solveAnim) { yield return true; }
     }
 }
